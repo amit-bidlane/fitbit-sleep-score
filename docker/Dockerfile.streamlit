@@ -17,7 +17,8 @@ RUN apt-get update \
 COPY requirements.txt requirements.txt ./
 
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && pip install streamlit
 
 COPY main.py ./
 COPY src ./src

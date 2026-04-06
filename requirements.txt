@@ -13,3 +13,4 @@ Jinja2>=3.1.6
 plotly>=6.0.0
 slowapi>=0.1.9
 uvicorn>=0.34.0
+cryptography

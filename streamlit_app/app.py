@@ -14,7 +14,8 @@ from streamlit_app.components.charts import render_dashboard_charts
 from streamlit_app.components.score_card import render_component_breakdown, render_score_cards
 from streamlit_app.components.sidebar import render_sidebar
 
-
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = 1
 def main() -> None:
     """Render the main dashboard application."""
 
@@ -44,6 +45,48 @@ def main() -> None:
         base_url=controls["api_url"],
         user_id=controls["user_id"],
     )
+    # ADD THIS BLOCK HERE
+    if st.sidebar.button("Generate Demo Sleep Data"):
+
+        demo_payload = {
+            "date": "2026-04-06",
+            "fitbit_log_id": 1,
+            "start_time": "2026-04-05T23:00:00Z",
+            "end_time": "2026-04-06T06:00:00Z",
+            "time_in_bed": 420,
+            "minutes_asleep": 400,
+            "minutes_awake": 20,
+            "minutes_after_wakeup": 5,
+            "minutes_to_fall_asleep": 10,
+            "awakenings_count": 2,
+            "efficiency": 95,
+            "is_main_sleep": True,
+            "session_type": "stages",
+            "stages": [
+                {
+                    "stage_type": "deep",
+                    "started_at": "2026-04-05T23:00:00Z",
+                    "ended_at": "2026-04-05T23:45:00Z",
+                    "seconds": 2700,
+                    "sequence_index": 0
+            },
+            {
+                    "stage_type": "rem",
+                    "started_at": "2026-04-06T02:00:00Z",
+                    "ended_at": "2026-04-06T02:40:00Z",
+                    "seconds": 2400,
+                    "sequence_index": 1
+            }
+        ],
+        "hrv": 60,
+        "resting_hr": 58,
+        "spo2": 98,
+        "source_payload": {}
+    }
+
+        client.analyze_sleep(demo_payload)
+
+        st.success("Demo sleep data generated!")
 
     if controls["analyze_requested"]:
         _submit_analysis(client, controls["analysis_payload"])
