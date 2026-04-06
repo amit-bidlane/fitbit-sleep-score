@@ -1,0 +1,61 @@
+app:
+  name: "Fitbit Sleep Score System"
+  environment: "development"
+  timezone: "Asia/Calcutta"
+  log_level: "INFO"
+
+database:
+  url: "mysql+aiomysql://user:password@mysql:3306/sleep_score_db?charset=utf8mb4"
+  pool_size: 10
+  max_overflow: 20
+  pool_recycle_seconds: 3600
+  echo_sql: false
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "http://localhost:8501"
+    - "http://127.0.0.1:8501"
+  rate_limits:
+    default: "120/minute"
+    analyze_sleep: "20/minute"
+    auth_register: "10/minute"
+
+streamlit:
+  host: "0.0.0.0"
+  port: 8501
+  api_base_url: "http://localhost:8000"
+  default_trend_days: 14
+
+ml:
+  checkpoint_dir: "checkpoints"
+  checkpoint_name: "sleep_classifier.pt"
+  training:
+    default_samples: 128
+    default_epochs: 3
+    default_batch_size: 16
+    default_seed: 42
+
+fitbit:
+  client_id: "replace-with-fitbit-client-id"
+  client_secret: "replace-with-fitbit-client-secret"
+  redirect_uri: "http://localhost:8501/oauth/callback"
+  user_id: "-"
+  scopes:
+    - sleep
+    - heartrate
+    - oxygen_saturation
+    - respiratory_rate
+  timeout_seconds: 30
+  retry_attempts: 3
+  backoff_factor: 1.5
+  token_expiry_buffer_seconds: 60
+  auto_refresh: true
+  max_rate_limit_wait_seconds: 120
+  api_base_url: "https://api.fitbit.com"
+  authorize_url: "https://www.fitbit.com/oauth2/authorize"
+  token_url: "https://api.fitbit.com/oauth2/token"
+  accept_language: "en_US"
+  accept_locale: "en_US"
+  token_cache_path: "../data/processed/fitbit_token_cache.json"

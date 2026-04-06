@@ -1,0 +1,4 @@
+logId,dateOfSleep,startTime,endTime,minutesAsleep,minutesAwake,timeInBed,minutesToFallAsleep,awakeningsCount,efficiency,levels_summary_deep_minutes,levels_summary_rem_minutes,levels_summary_light_minutes,levels_summary_wake_minutes
+100000,2026-04-03,2026-04-03T23:45:00+00:00,2026-04-04T08:24:00+00:00,501,18,519,22,4,96.53,92,94,315,18
+100001,2026-04-04,2026-04-04T23:00:00+00:00,2026-04-05T07:22:00+00:00,441,61,502,14,1,87.85,73,87,281,61
+100002,2026-04-05,2026-04-05T21:00:00+00:00,2026-04-06T05:46:00+00:00,489,37,526,15,2,92.97,100,117,272,37

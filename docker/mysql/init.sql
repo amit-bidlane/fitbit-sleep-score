@@ -1,0 +1,1 @@
+-- Placeholder MySQL init script.

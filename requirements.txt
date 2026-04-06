@@ -1,0 +1,15 @@
+numpy>=1.26.4
+pandas>=2.2.2
+PyYAML>=6.0.2
+requests>=2.32.3
+scikit-learn>=1.5.2
+SQLAlchemy>=2.0.36
+aiomysql>=0.2.0
+alembic>=1.14.0
+fastapi>=0.115.5
+pydantic>=2.10.3
+torch>=2.0.0
+Jinja2>=3.1.6
+plotly>=6.0.0
+slowapi>=0.1.9
+uvicorn>=0.34.0

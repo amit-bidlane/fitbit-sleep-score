@@ -1,0 +1,4 @@
+-r requirements.streamlit.txt
+pytest>=8.3.5
+jupyterlab>=4.4.0
+ipykernel>=6.29.5

@@ -1,0 +1,12 @@
+name: ci-cd
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CI/CD workflow placeholder"

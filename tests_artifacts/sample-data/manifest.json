@@ -1,0 +1,12 @@
+{
+  "seed": 7,
+  "days": 5,
+  "end_date": "2026-04-05",
+  "files": {
+    "sleep_sessions": "sleep_sessions.csv",
+    "sleep_stages": "sleep_stages.csv",
+    "heart_rate": "heart_rate.csv",
+    "hrv": "hrv.csv",
+    "spo2": "spo2.csv"
+  }
+}

@@ -1,0 +1,10 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "docker/Dockerfile"
+
+[deploy]
+startCommand = "sh -c './scripts/wait_for_db.sh mysql 3306 && python -m alembic upgrade head && python main.py api --host 0.0.0.0 --port $PORT'"
+healthcheckPath = "/docs"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

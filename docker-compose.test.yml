@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: sleep_score_test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    command:
+      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3308:3306"
+    tmpfs:
+      - /var/lib/mysql
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      DATABASE_URL: mysql+aiomysql://user:password@mysql:3306/sleep_score_test?charset=utf8mb4
+      PYTHONPATH: /app
+    command: ["sh", "-c", "./scripts/wait_for_db.sh mysql 3306 && python -m alembic upgrade head && pytest tests"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./:/app

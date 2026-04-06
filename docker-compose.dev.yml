@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: sleep_score_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    command:
+      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      DATABASE_URL: mysql+aiomysql://user:password@mysql:3306/sleep_score_db?charset=utf8mb4
+      PYTHONPATH: /app
+    command: ["sh", "-c", "./scripts/wait_for_db.sh mysql 3306 && python -m alembic upgrade head && uvicorn src.api.routes:app --host 0.0.0.0 --port 8000 --reload"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.streamlit
+    environment:
+      PYTHONPATH: /app
+    command: ["streamlit", "run", "streamlit_app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    depends_on:
+      fastapi:
+        condition: service_started
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/app
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jupyter
+    environment:
+      DATABASE_URL: mysql+aiomysql://user:password@mysql:3306/sleep_score_db?charset=utf8mb4
+      PYTHONPATH: /app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/app
+
+volumes:
+  mysql_dev_data:
