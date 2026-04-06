@@ -1,218 +1,381 @@
 # Fitbit Sleep Score System
 
-Fitbit Sleep Score System is a Python application for ingesting Fitbit-style sleep data, engineering nightly features, calculating sleep scores, persisting results in MySQL, serving analytics through FastAPI, and visualizing trends in Streamlit.
+A full-stack sleep analytics platform that ingests Fitbit-style sleep logs, calculates nightly sleep scores using engineered features and ML pipelines, stores results in MySQL, exposes analytics via FastAPI, and visualizes insights through a Streamlit dashboard.
 
-## Project Architecture
+This project simulates a real-world wearable data pipeline including data ingestion, feature engineering, scoring, analytics APIs, and an interactive dashboard.
 
-The project is organized into five main layers:
+## Architecture Overview
 
-- `src/data`: Fitbit ingestion, preprocessing, and feature engineering.
-- `src/database`: SQLAlchemy models, async DB session management, CRUD operations, and Alembic migrations.
-- `src/models`: Sleep scoring, anomaly detection, and PyTorch training utilities.
-- `src/api`: FastAPI schemas and routes for analysis, reporting, trend views, and user registration.
-- `streamlit_app`: Multi-page dashboard and API client for the user-facing analytics experience.
+```text
+Fitbit Sleep Data
+        |
+        v
+Data Processing Layer
+(src/data)
+        |
+        v
+Feature Engineering
+        |
+        v
+Sleep Scoring Models
+(src/models)
+        |
+        v
+FastAPI Backend
+(src/api)
+        |
+        v
+MySQL Database
+(src/database)
+        |
+        v
+Streamlit Analytics Dashboard
+(streamlit_app)
+```
 
-Supporting directories:
+## Project Structure
 
-- `docker`: Dockerfiles plus MySQL init/config assets.
-- `data/sample`: Synthetic data generation utilities.
-- `notebooks`: Jupyter workspace for experiments.
-- `tests`: API, data, model, CRUD, and visualization coverage.
+```text
+fitbit-sleep-score
+|
++-- src
+|   +-- api              # FastAPI routes and schemas
+|   +-- data             # Fitbit ingestion + feature engineering
+|   +-- database         # SQLAlchemy models + CRUD + migrations
+|   \-- models           # Sleep scoring and anomaly detection
+|
++-- streamlit_app        # Interactive analytics dashboard
+|
++-- docker               # Dockerfiles and MySQL configuration
+|
++-- data/sample          # Synthetic data generation utilities
+|
++-- notebooks            # Jupyter experimentation environment
+|
++-- tests                # API, data, model and visualization tests
+|
++-- docker-compose.yml
++-- docker-compose.dev.yml
++-- docker-compose.test.yml
+|
+\-- main.py              # CLI entrypoint
+```
+
+## Key Features
+
+### Sleep Data Ingestion
+
+Processes Fitbit-style sleep logs including:
+
+- sleep stages
+- time in bed
+- heart rate
+- HRV
+- oxygen saturation
+
+### Feature Engineering
+
+Transforms raw logs into nightly features such as:
+
+- sleep efficiency
+- deep/REM distribution
+- sleep fragmentation
+- recovery indicators
+
+### Sleep Score Engine
+
+Computes a composite sleep score based on:
+
+- duration
+- efficiency
+- sleep stages
+- physiological metrics
+
+### FastAPI Backend
+
+Provides REST APIs for:
+
+- sleep analysis
+- nightly reports
+- trend analytics
+- recommendations
+- model metadata
+
+### Streamlit Dashboard
+
+Interactive UI for:
+
+- nightly sleep score
+- stage visualization
+- trend analysis
+- sleep recommendations
+- weekly analytics
+
+### Dockerized Stack
+
+Containerized services:
+
+- MySQL database
+- FastAPI backend
+- Streamlit dashboard
+- optional JupyterLab environment
+
+## Technology Stack
+
+### Backend
+
+- Python 3.12
+- FastAPI
+- SQLAlchemy
+- Alembic
+- MySQL
+- Pydantic
+
+### Data / ML
+
+- PyTorch
+- Pandas
+- NumPy
+
+### Frontend
+
+- Streamlit
+
+### DevOps
+
+- Docker
+- Docker Compose
 
 ## Setup Instructions
 
-### 1. Prerequisites
+### Prerequisites
 
-- Python 3.12 is recommended.
-- MySQL 8.x for local non-Docker setup.
-- Docker Desktop if you want to use Compose.
+- Python 3.12
+- Docker Desktop (recommended)
+- MySQL 8 (optional for local setup)
 
-### 2. Create a virtual environment
+### 1. Create Virtual Environment
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+Activate:
 
-Core backend:
+Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Mac/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+Backend dependencies:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-Dashboard and API client extras:
+Streamlit dashboard dependencies:
 
 ```powershell
 pip install -r requirements.streamlit.txt
 ```
 
-Full development toolchain:
+Full development environment:
 
 ```powershell
 pip install -r requirements.dev.txt
 ```
 
-### 4. Configure secrets and settings
+### 3. Configure Environment
 
-- Review `config/config.yaml` for non-secret defaults.
-- Follow `SECRETS_SETUP.md` for environment variables and Streamlit secrets.
-- Set `DATABASE_URL` if you are not using the Docker default host name `mysql`.
+Review configuration:
 
-### 5. Initialize the database
+`config/config.yaml`
 
-Run migrations:
+Follow setup guide:
+
+`SECRETS_SETUP.md`
+
+Set environment variables such as:
+
+- `DATABASE_URL`
+- `API_BASE_URL`
+
+### 4. Run Database Migrations
 
 ```powershell
 python -m alembic upgrade head
 ```
 
-### 6. Start the API
+### 5. Start FastAPI Server
 
 ```powershell
-python main.py api --host 0.0.0.0 --port 8000
+python main.py api
 ```
 
-### 7. Start the Streamlit dashboard
+API will start at:
+
+`http://localhost:8000`
+
+### 6. Start Streamlit Dashboard
 
 ```powershell
 streamlit run streamlit_app/app.py
 ```
 
-## API Usage
+Dashboard will be available at:
 
-The FastAPI app is served from `src.api.routes:app`.
+`http://localhost:8501`
 
-Interactive docs:
+## Docker Setup (Recommended)
 
-- Swagger UI: `http://localhost:8000/docs`
-- OpenAPI JSON: `http://localhost:8000/openapi.json`
-
-Authentication model:
-
-- Most endpoints require the `X-User-Id` header.
-- Register a user first with `POST /auth/register`.
-
-### Common endpoints
-
-- `POST /auth/register`
-- `GET /auth/me`
-- `POST /sleep/analyze`
-- `GET /sleep/score/{target_date}`
-- `GET /sleep/trend?days=14`
-- `GET /sleep/stages/{target_date}`
-- `GET /sleep/recommendations/{target_date}`
-- `GET /sleep/report/{target_date}`
-- `GET /analytics/weekly`
-- `GET /analytics/best-night`
-- `GET /analytics/worst-night`
-
-### Example: register a user
-
-```bash
-curl -X POST http://localhost:8000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "fitbit_user_id": "demo-user",
-    "email": "demo@example.com",
-    "full_name": "Demo User"
-  }'
-```
-
-### Example: analyze a night
-
-```bash
-curl -X POST http://localhost:8000/sleep/analyze \
-  -H "Content-Type: application/json" \
-  -H "X-User-Id: 1" \
-  -d '{
-    "date": "2026-04-05",
-    "start_time": "2026-04-05T22:00:00",
-    "end_time": "2026-04-06T06:00:00",
-    "time_in_bed": 480,
-    "minutes_asleep": 450,
-    "minutes_awake": 30,
-    "minutes_after_wakeup": 5,
-    "minutes_to_fall_asleep": 10,
-    "awakenings_count": 1,
-    "efficiency": 93.8,
-    "hrv": 55.0,
-    "resting_hr": 57.0,
-    "spo2": 97.0,
-    "stages": []
-  }'
-```
-
-## Docker Setup
-
-The repository includes:
-
-- `docker/Dockerfile` for FastAPI and migrations.
-- `docker/Dockerfile.streamlit` for the dashboard.
-- `docker/Dockerfile.jupyter` for notebook workflows.
-- `docker-compose.yml` for the standard multi-service stack.
-- `docker-compose.dev.yml` for a bind-mounted development workflow.
-- `docker-compose.test.yml` for running tests against MySQL.
-
-### Start the full stack
+Run the full stack:
 
 ```bash
 docker compose up --build
 ```
 
-This starts:
+Services started:
 
-- `mysql`
-- `fastapi`
-- `streamlit`
-- `jupyter`
+| Service | Port |
+| --- | --- |
+| FastAPI | 8000 |
+| Streamlit | 8501 |
+| JupyterLab | 8888 |
+| MySQL | 3306 |
 
-### Development mode
+## API Documentation
 
-```bash
-docker compose -f docker-compose.dev.yml up --build
+### Swagger UI
+
+`http://localhost:8000/docs`
+
+### OpenAPI JSON
+
+`http://localhost:8000/openapi.json`
+
+## Authentication
+
+Most endpoints require the header:
+
+`X-User-Id`
+
+Register a user first.
+
+### Register User Example
+
+`POST /auth/register`
+
+Example payload:
+
+```json
+{
+  "fitbit_user_id": "demo_user",
+  "email": "demo@example.com",
+  "full_name": "Demo User",
+  "birth_date": "1995-01-01",
+  "sex": "male",
+  "timezone": "UTC"
+}
 ```
 
-### Test mode
+### Analyze Sleep Example
 
-```bash
-docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
+`POST /sleep/analyze`
+
+Headers:
+
+`X-User-Id: 1`
+
+Example payload:
+
+```json
+{
+  "date": "2026-04-06",
+  "fitbit_log_id": 1,
+  "start_time": "2026-04-05T23:00:00",
+  "end_time": "2026-04-06T06:00:00",
+  "time_in_bed": 420,
+  "minutes_asleep": 400,
+  "minutes_awake": 20,
+  "awakenings_count": 2,
+  "efficiency": 95,
+  "hrv": 60,
+  "resting_hr": 58,
+  "spo2": 98,
+  "stages": []
+}
 ```
 
-### Default service URLs
+## Key API Endpoints
 
-- API: `http://localhost:8000`
-- Streamlit: `http://localhost:8501`
-- JupyterLab: `http://localhost:8888`
-- MySQL: `localhost:3306`
+| Endpoint | Description |
+| --- | --- |
+| `POST /auth/register` | Register user |
+| `GET /auth/me` | Current user |
+| `POST /sleep/analyze` | Analyze sleep data |
+| `GET /sleep/score/{date}` | Nightly sleep score |
+| `GET /sleep/trend` | Trend analysis |
+| `GET /sleep/stages/{date}` | Sleep stage intervals |
+| `GET /sleep/recommendations/{date}` | Sleep recommendations |
+| `GET /analytics/weekly` | Weekly analytics |
+| `GET /analytics/best-night` | Best sleep night |
+| `GET /analytics/worst-night` | Worst sleep night |
 
-## Deployment Guide
+## Testing
 
-### Railway
+Run tests:
 
-This repo includes `railway.toml` configured to build from `docker/Dockerfile`, wait for MySQL, run Alembic migrations, and then launch FastAPI.
+```powershell
+pytest
+```
 
-Recommended Railway setup:
+Tests cover:
 
-1. Provision a MySQL service.
-2. Set `DATABASE_URL` with the Railway MySQL connection string.
-3. Set Fitbit secrets from `SECRETS_SETUP.md`.
-4. Deploy the repo and confirm the health check at `/docs`.
+- API endpoints
+- data pipeline
+- feature engineering
+- sleep scoring models
+- visualization logic
 
-### Generic container platforms
+## Deployment
 
-For Render, Fly.io, Azure Container Apps, ECS, or Kubernetes:
+The project supports deployment to:
 
-1. Build from `docker/Dockerfile` for the API service.
-2. Inject `DATABASE_URL` and Fitbit secrets as environment variables.
-3. Run `python -m alembic upgrade head` during release or startup.
-4. Expose the API on the platform-provided port.
-5. Deploy Streamlit separately with `docker/Dockerfile.streamlit` if you want the dashboard hosted independently.
+- Railway
+- Render
+- Fly.io
+- AWS ECS
+- Kubernetes
+- Azure Container Apps
 
-### Production notes
+Using:
 
-- Use managed MySQL instead of the bundled Compose database.
-- Store secrets in the platform secret manager, not in `config/config.yaml`.
-- Keep the Streamlit `API_BASE_URL` pointed at the deployed FastAPI base URL.
-- Review Fitbit API lifecycle constraints before committing to long-term production use.
+`docker/Dockerfile`
+
+Recommended production setup:
+
+- managed MySQL database
+- environment secrets
+- separate Streamlit service
+
+## Future Improvements
+
+- Fitbit API integration
+- personalized ML sleep models
+- long-term sleep health analytics
+- mobile dashboard
+- real-time sleep tracking
+
+## Author
+
+**Amit Bidlane** 
+Python Developer | Backend Development | Data Systems
